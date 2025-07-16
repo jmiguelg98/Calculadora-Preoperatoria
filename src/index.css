@@ -11,31 +11,31 @@
 
 @layer components {
   .medical-card {
-    @apply bg-white rounded-xl shadow-medical border border-medical-gray-200;
+    @apply bg-white rounded-xl shadow-lg border border-gray-200;
   }
   
   .medical-input {
-    @apply w-full px-4 py-3 border border-medical-gray-300 rounded-lg focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-colors bg-white text-medical-gray-900;
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600/20 focus:border-red-600 transition-colors bg-white text-gray-900;
   }
   
   .medical-select {
-    @apply w-full px-4 py-3 border border-medical-gray-300 rounded-lg focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-colors bg-white text-medical-gray-900 cursor-pointer;
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600/20 focus:border-red-600 transition-colors bg-white text-gray-900 cursor-pointer;
   }
   
   .medical-button {
-    @apply px-6 py-3 bg-medical-primary text-white font-medium rounded-lg hover:bg-medical-secondary transition-all duration-200 shadow-sm hover:shadow-medical disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-6 py-3 bg-red-700 text-white font-medium rounded-lg hover:bg-red-800 transition-all duration-200 shadow-sm hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .medical-button-secondary {
-    @apply px-6 py-3 bg-medical-gray-100 text-medical-gray-700 font-medium rounded-lg hover:bg-medical-gray-200 transition-all duration-200 border border-medical-gray-300;
+    @apply px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-all duration-200 border border-gray-300;
   }
   
   .medical-checkbox {
-    @apply w-5 h-5 text-medical-primary bg-white border-medical-gray-300 rounded focus:ring-medical-primary/20 focus:ring-2;
+    @apply w-5 h-5 text-red-600 bg-white border-gray-300 rounded focus:ring-red-600/20 focus:ring-2;
   }
   
   .result-card {
-    @apply bg-gradient-to-r from-medical-primary to-medical-accent text-white p-6 rounded-xl shadow-medical-lg;
+    @apply bg-gradient-to-r from-red-700 to-red-800 text-white p-6 rounded-xl shadow-lg;
   }
   
   .info-badge {
