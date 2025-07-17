@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Calculator, User, Weight, Ruler, TestTube } from 'lucide-react';
 
-const CrClCalculator = ({ onClose, onCalculate }) => {
+const CrClCalculator = ({ onClose, onCalculate, initialData }) => {
   const [formData, setFormData] = useState({
-    sex: '',
-    age: '',
-    weight: '',
-    creatinine: '',
+    sex: initialData?.sexo === 'femenino' ? 'female' : initialData?.sexo === 'masculino' ? 'male' : '',
+    age: initialData?.edad || '',
+    weight: initialData?.peso || '',
+    creatinine: initialData?.creatinina_serica || '',
     height: ''
   });
   const [result, setResult] = useState(null);
@@ -20,6 +20,13 @@ const CrClCalculator = ({ onClose, onCalculate }) => {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
+
+  useEffect(() => {
+    if (formData.sex && formData.age > 0 && formData.weight > 0 && formData.creatinine > 0) {
+      calculateCrCl();  // Auto-compute locally if all required fields are filled
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run on mount only with initial data
 
   const validateForm = () => {
     const newErrors = {};

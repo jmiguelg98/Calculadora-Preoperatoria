@@ -18,7 +18,7 @@ const ResultsDisplay = ({ formData }) => {
 
     // Process each medication
     Object.entries(formData.medications).forEach(([medication, data]) => {
-      if (data.suspension) {
+      if (data.toma === 'toma') {
         const recommendation = processMedication(medication, data, formData);
         if (recommendation) {
           recommendations.push(recommendation);
@@ -39,6 +39,8 @@ const ResultsDisplay = ({ formData }) => {
   };
 
   const processMedication = (medication, data, patientData) => {
+    if (data.toma !== 'toma') return null;  // Skip if not taking
+
     const medNames = {
       heparina_no_fraccionada: 'Heparina No Fraccionada',
       hbpm: 'Heparina de Bajo Peso Molecular (HBPM)',
@@ -51,7 +53,8 @@ const ResultsDisplay = ({ formData }) => {
     };
 
     const crCl = parseFloat(patientData.creatinina_clearance) || 90;
-    const isHighRisk = patientData.riesgo_sangrado === 'alto';
+    const isHighBleedingRisk = patientData.riesgo_sangrado === 'alto';
+    const isHighThromboticRisk = patientData.riesgo_trombotico === 'alto';
     
     let recommendation = {
       type: 'success',
@@ -64,87 +67,101 @@ const ResultsDisplay = ({ formData }) => {
 
     switch (medication) {
       case 'heparina_no_fraccionada':
-        if (data.suspension === 'suspender_24h') {
-          recommendation.message = 'Suspender 4-6 horas antes del procedimiento';
-          recommendation.details = ['Vida media corta: 1-2 horas', 'TTPa normaliza en 4-6 horas'];
-        }
+        recommendation.message = 'Suspender 4-6 horas antes del procedimiento';
+        recommendation.details = [
+          'Vida media corta: 1-2 horas',
+          'TTPa normaliza en 4-6 horas',
+          'Considerar reversión con protamina si necesario'
+        ];
         break;
         
       case 'hbpm':
-        if (data.suspension === 'suspender_24h') {
-          recommendation.message = crCl >= 30 ? 
-            'Suspender 24 horas antes (dosis profiláctica) o 24-48h (terapéutica)' :
-            'Suspender 48 horas antes (función renal reducida)';
-          recommendation.details = [
-            `CrCl: ${crCl} ml/min`,
-            crCl < 30 ? 'Ajuste por función renal' : 'Función renal normal'
-          ];
+        if (crCl >= 30) {
+          recommendation.message = 'Suspender 12 horas antes (profiláctica) o 24 horas antes (terapéutica)';
+        } else {
+          recommendation.message = 'Suspender 24-48 horas antes (función renal reducida)';
         }
+        recommendation.details = [
+          `CrCl: ${crCl} ml/min`,
+          crCl < 30 ? 'Ajuste por función renal reducida' : 'Función renal normal',
+          'Monitorear anti-Xa si disponible'
+        ];
         break;
         
       case 'noacs':
-        if (data.suspension.includes('suspender')) {
-          const hours = crCl >= 50 ? '48' : '72';
-          recommendation.message = `Suspender ${hours} horas antes del procedimiento`;
-          recommendation.details = [
-            `CrCl: ${crCl} ml/min`,
-            'Considerar anti-Xa si disponible',
-            isHighRisk ? 'Procedimiento alto riesgo - considerar bridging' : ''
-          ].filter(Boolean);
-        }
-        break;
-        
-      case 'avk':
-        if (data.suspension.includes('suspender')) {
-          recommendation.message = 'Suspender 5 días antes, INR objetivo <1.5';
-          recommendation.details = [
-            'Monitorear INR 24h antes del procedimiento',
-            isHighRisk ? 'Considerar bridging con HBPM' : 'Sin bridging necesario'
-          ];
-        }
-        break;
-        
-      case 'aspirina':
-        if (data.suspension === 'continuar') {
-          recommendation.message = 'Continuar aspirina en dosis bajas';
-          recommendation.details = ['Beneficio cardiovascular supera riesgo de sangrado'];
-        } else if (data.suspension.includes('suspender')) {
-          recommendation.message = 'Suspender 7 días antes si alto riesgo de sangrado';
-          recommendation.details = ['Evaluar riesgo trombótico vs hemorrágico'];
-        }
-        break;
-        
-      case 'dapt':
-        if (data.suspension.includes('suspender')) {
-          recommendation.message = 'Manejo complejo - consultar cardiología';
-          recommendation.details = [
-            'Evaluar tiempo desde stent',
-            'Considerar continuar aspirina y suspender P2Y12',
-            'Procedimiento alto riesgo puede requerir posposición'
-          ];
+        const suspensionTime = crCl >= 30 ? '24-48' : '48-72';
+        recommendation.message = `Suspender ${suspensionTime} horas antes del procedimiento`;
+        recommendation.details = [
+          `CrCl: ${crCl} ml/min`,
+          'Considerar anti-Xa específico si disponible',
+          isHighThromboticRisk ? 'Alto riesgo trombótico - considerar bridging' : '',
+          crCl < 30 ? 'Extender suspensión por función renal reducida' : ''
+        ].filter(Boolean);
+        if (crCl < 15) {
+          recommendation.message = 'Suspender 72 horas antes (CrCl <15 ml/min)';
           recommendation.type = 'warning';
         }
         break;
         
-      case 'glp1_agonistas':
-        if (data.suspension.includes('suspender')) {
-          recommendation.message = 'Suspender día de la cirugía';
-          recommendation.details = [
-            'Retraso en vaciamiento gástrico',
-            'Riesgo de broncoaspiración',
-            'Reanudar cuando tolere vía oral'
-          ];
+      case 'avk':
+        recommendation.message = 'Suspender 5 días antes, objetivo INR <1.5';
+        recommendation.details = [
+          'Monitorear INR 24h antes del procedimiento',
+          isHighThromboticRisk ? 'Alto riesgo trombótico - considerar bridging con HBPM' : 'Sin bridging necesario'
+        ];
+        if (data.inr) {
+          recommendation.details.push(`INR actual: ${data.inr}`);
+          if (data.inr > 1.5) {
+            recommendation.message += ' (INR elevado: considerar puente con heparina)';
+            recommendation.type = 'warning';
+          }
         }
         break;
         
+      case 'aspirina':
+        if (isHighBleedingRisk) {
+          recommendation.message = 'Suspender 7 días antes si alto riesgo de sangrado';
+          recommendation.details = ['Evaluar riesgo trombótico vs hemorrágico individual'];
+          recommendation.type = 'warning';
+        } else {
+          recommendation.message = 'Continuar aspirina en dosis bajas';
+          recommendation.details = ['Beneficio cardiovascular supera riesgo de sangrado'];
+        }
+        break;
+        
+      case 'dapt':
+        recommendation.message = 'Manejo complejo - consultar cardiología';
+        recommendation.details = [
+          'Evaluar tiempo transcurrido desde colocación de stent',
+          'Considerar continuar aspirina y suspender inhibidor P2Y12',
+          'Procedimiento alto riesgo puede requerir posposición'
+        ];
+        recommendation.type = 'warning';
+        break;
+        
+      case 'glp1_agonistas':
+        recommendation.message = 'Suspender el día de la cirugía';
+        recommendation.details = [
+          'Retraso en vaciamiento gástrico',
+          'Riesgo aumentado de broncoaspiración',
+          'Reanudar cuando tolere completamente la vía oral'
+        ];
+        break;
+        
       case 'sglt2_inhibidores':
-        if (data.suspension.includes('suspender')) {
-          recommendation.message = 'Suspender 24-48h antes del procedimiento';
-          recommendation.details = [
-            'Riesgo de cetoacidosis euglucémica',
-            'Monitorear cetonas si disponible',
-            'Reanudar cuando estable y tolerando VO'
-          ];
+        recommendation.message = 'Suspender 3-4 días antes para reducir riesgo de cetoacidosis euglucémica (eDKA)';
+        recommendation.details = [
+          'Riesgo de cetoacidosis euglucémica',
+          'Monitorear cetonas si disponible',
+          'Asegurar hidratación adecuada',
+          'Reanudar cuando paciente esté estable y tolerando VO'
+        ];
+        if (data.bohb) {
+          recommendation.details.push(`BOHB actual: ${data.bohb} mmol/L`);
+          if (data.bohb > 2) {
+            recommendation.message += ' (BOHB elevado: hidratar y monitorear estrechamente)';
+            recommendation.type = 'warning';
+          }
         }
         break;
       default:

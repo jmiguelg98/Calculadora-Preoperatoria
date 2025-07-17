@@ -51,16 +51,11 @@ const App = () => {
     }));
   };
 
-  const calculateCrCl = (values) => {
-    const { edad, peso, creatinina, sexo } = values;
-    const factor = sexo === 'femenino' ? 0.85 : 1;
-    const crCl = ((140 - parseInt(edad)) * parseInt(peso) * factor) / (72 * parseFloat(creatinina));
-    
+  const calculateCrCl = (crClValue) => {
     setFormData(prev => ({
       ...prev,
-      creatinina_clearance: crCl.toFixed(1)
+      creatinina_clearance: crClValue.toFixed(1)
     }));
-    
     setShowCrClCalculator(false);
   };
 

@@ -202,17 +202,29 @@ const MedicationForm = ({ formData, handleInputChange, handleFactorChange, onOpe
                   <h4 className="text-sm font-medium text-gray-700">
                     {displayNames[med]}
                   </h4>
-                  <select
-                    value={formData.medications[med]?.suspension || ''}
-                    onChange={(e) => handleFactorChange(med, 'suspension', e.target.value)}
+                                    <select
+                    value={formData.medications[med]?.toma || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      handleFactorChange(med, 'toma', value);
+                      if (value === 'toma') {
+                        if (med === 'avk') {
+                          const hasINR = window.confirm('¿INR actual disponible?');
+                          if (hasINR) {
+                            const inrValue = window.prompt('Ingrese el valor de INR:');
+                            if (inrValue) handleFactorChange(med, 'inr', parseFloat(inrValue));
+                          }
+                        }
+                      } else {
+                        // Clear extra data if 'no toma'
+                        handleFactorChange(med, 'inr', null);
+                      }
+                    }}
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-medical-primary focus:border-medical-primary"
                   >
                     <option value="">No toma</option>
-                    <option value="continuar">Continuar</option>
-                    <option value="suspender_24h">Suspender 24h antes</option>
-                    <option value="suspender_48h">Suspender 48h antes</option>
-                                         <option value="suspender_72h">Suspender 72h antes</option>
-                   </select>
+                    <option value="toma">Toma</option>
+                  </select>
                  </div>
                  );
                })}
@@ -233,16 +245,17 @@ const MedicationForm = ({ formData, handleInputChange, handleFactorChange, onOpe
                   <h4 className="text-sm font-medium text-gray-700">
                     {displayNames[med]}
                   </h4>
-                  <select
-                    value={formData.medications[med]?.suspension || ''}
-                    onChange={(e) => handleFactorChange(med, 'suspension', e.target.value)}
+                                    <select
+                    value={formData.medications[med]?.toma || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      handleFactorChange(med, 'toma', value);
+                    }}
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-medical-primary focus:border-medical-primary"
                   >
                     <option value="">No toma</option>
-                    <option value="continuar">Continuar</option>
-                    <option value="suspender_7d">Suspender 7 días antes</option>
-                                         <option value="suspender_5d">Suspender 5 días antes</option>
-                   </select>
+                    <option value="toma">Toma</option>
+                  </select>
                  </div>
                  );
                })}
@@ -263,16 +276,28 @@ const MedicationForm = ({ formData, handleInputChange, handleFactorChange, onOpe
                   <h4 className="text-sm font-medium text-gray-700">
                     {displayNames[med]}
                   </h4>
-                  <select
-                    value={formData.medications[med]?.suspension || ''}
-                    onChange={(e) => handleFactorChange(med, 'suspension', e.target.value)}
+                                    <select
+                    value={formData.medications[med]?.toma || ''}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      handleFactorChange(med, 'toma', value);
+                      if (value === 'toma') {
+                        if (med === 'sglt2_inhibidores') {
+                          const hasBOHB = window.confirm('¿BOHB disponible?');
+                          if (hasBOHB) {
+                            const bohbValue = window.prompt('Ingrese el valor de BOHB (mmol/L):');
+                            if (bohbValue) handleFactorChange(med, 'bohb', parseFloat(bohbValue));
+                          }
+                        }
+                      } else {
+                        // Clear extra data if 'no toma'
+                        handleFactorChange(med, 'bohb', null);
+                      }
+                    }}
                     className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-medical-primary focus:border-medical-primary"
                   >
                     <option value="">No toma</option>
-                    <option value="continuar">Continuar</option>
-                    <option value="suspender_24h">Suspender 24h antes</option>
-                    <option value="suspender_48h">Suspender 48h antes</option>
-                                         <option value="suspender_hasta_tolerancia">Suspender hasta tolerancia oral</option>
+                    <option value="toma">Toma</option>
                    </select>
                  </div>
                  );

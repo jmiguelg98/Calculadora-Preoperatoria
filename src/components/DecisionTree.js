@@ -252,7 +252,7 @@ CrCl: ${data.creatinina_clearance || 'No calculado'} ml/min
 
 MEDICAMENTOS EVALUADOS:
 ${Object.entries(medications).map(([med, factors]) => 
-  `- ${med.toUpperCase()}: ${factors.suspension || 'Continuar'}`).join('\n')}
+  `- ${med.toUpperCase()}: ${factors.toma === 'toma' ? 'Toma - Ver recomendaciones' : 'No toma'}`).join('\n')}
 
 Generado el ${new Date().toLocaleDateString('es-ES')}
     `;
