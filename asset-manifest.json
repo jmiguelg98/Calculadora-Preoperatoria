@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/Calculadora-Preoperatoria/static/css/main.3ef1906f.css",
-    "main.js": "/Calculadora-Preoperatoria/static/js/main.aa2c2f8f.js",
+    "main.js": "/Calculadora-Preoperatoria/static/js/main.3c783516.js",
     "index.html": "/Calculadora-Preoperatoria/index.html",
     "main.3ef1906f.css.map": "/Calculadora-Preoperatoria/static/css/main.3ef1906f.css.map",
-    "main.aa2c2f8f.js.map": "/Calculadora-Preoperatoria/static/js/main.aa2c2f8f.js.map"
+    "main.3c783516.js.map": "/Calculadora-Preoperatoria/static/js/main.3c783516.js.map"
   },
   "entrypoints": [
     "static/css/main.3ef1906f.css",
-    "static/js/main.aa2c2f8f.js"
+    "static/js/main.3c783516.js"
   ]
 }
