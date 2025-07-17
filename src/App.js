@@ -3,12 +3,12 @@ import { Calculator, Stethoscope, Activity, User } from 'lucide-react';
 import './App.css';
 import MedicationForm from './components/MedicationForm';
 import ResultsDisplay from './components/ResultsDisplay';
-import CrClCalculator from './components/CrClCalculator';
+// import CrClCalculator from './components/CrClCalculator'; // Not used for direct calculation
 import DecisionTree from './components/DecisionTree';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('form');
-  const [showCrClCalculator, setShowCrClCalculator] = useState(false);
+  // const [showCrClCalculator, setShowCrClCalculator] = useState(false); // Not needed for direct calculation
   const [formData, setFormData] = useState({
     edad: '',
     sexo: '',
@@ -51,12 +51,42 @@ const App = () => {
     }));
   };
 
-  const calculateCrCl = (crClValue) => {
-    setFormData(prev => ({
-      ...prev,
-      creatinina_clearance: crClValue.toFixed(1)
-    }));
-    setShowCrClCalculator(false);
+  // Old modal callback function - kept for reference but not used
+  // const calculateCrCl = (crClValue) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     creatinina_clearance: crClValue.toFixed(1)
+  //   }));
+  //   setShowCrClCalculator(false);
+  // };
+
+  // New function for direct calc
+  const handleDirectCrClCalc = () => {
+    const { edad, peso, sexo, creatinina_serica, altura } = formData;
+    
+    if (!edad || !peso || !sexo || !creatinina_serica) {
+      alert('Complete edad, peso, sexo y creatinina sérica para calcular.');
+      return;
+    }
+    
+    const age = parseInt(edad);
+    const weight = parseFloat(peso);
+    const creatinine = parseFloat(creatinina_serica);
+    const factor = sexo === 'femenino' ? 0.85 : 1;
+    
+    let calcWeight = weight;
+    if (altura) {  // Adjust if height provided
+      const heightCm = parseFloat(altura);
+      const heightIn = heightCm / 2.54;
+      let ibw = (sexo === 'femenino') ? 45.5 + 2.3 * (heightIn - 60) : 50 + 2.3 * (heightIn - 60);
+      if (weight > ibw) {
+        calcWeight = ibw + 0.4 * (weight - ibw);
+      }
+    }
+    
+    const crCl = ((140 - age) * calcWeight * factor) / (72 * creatinine);
+    
+    setFormData(prev => ({ ...prev, creatinina_clearance: crCl.toFixed(1) }));
   };
 
   const tabs = [
@@ -125,7 +155,7 @@ const App = () => {
               formData={formData}
               handleInputChange={handleInputChange}
               handleFactorChange={handleFactorChange}
-              onOpenCrClCalculator={() => setShowCrClCalculator(true)}
+              onCalculateCrCl={handleDirectCrClCalc}
             />
           )}
           
@@ -139,7 +169,8 @@ const App = () => {
         </div>
       </main>
 
-      {/* CrCl Calculator Modal */}
+      {/* CrCl Calculator Modal - Commented out as we now use direct calculation */}
+      {/* 
       {showCrClCalculator && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full">
@@ -156,6 +187,7 @@ const App = () => {
           </div>
         </div>
       )}
+      */}
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-16">

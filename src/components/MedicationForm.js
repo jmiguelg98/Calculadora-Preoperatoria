@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pill, Activity, Calculator, Stethoscope } from 'lucide-react';
 
-const MedicationForm = ({ formData, handleInputChange, handleFactorChange, onOpenCrClCalculator }) => {
+const MedicationForm = ({ formData, handleInputChange, handleFactorChange, onCalculateCrCl }) => {
   return (
     <div className="p-6 space-y-8">
       {/* Patient Information */}
@@ -109,7 +109,7 @@ const MedicationForm = ({ formData, handleInputChange, handleFactorChange, onOpe
               />
               <button
                 type="button"
-                onClick={onOpenCrClCalculator}
+                onClick={onCalculateCrCl}
                 className="px-4 py-2 bg-medical-primary text-white rounded-md hover:bg-medical-secondary transition-colors flex items-center space-x-2"
               >
                 <Calculator className="w-4 h-4" />
